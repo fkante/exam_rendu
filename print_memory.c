@@ -1,52 +1,63 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   print_memory.c                                     :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: fkante <marvin@42.fr>                      +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/07/15 12:12:01 by fkante            #+#    #+#             */
-/*   Updated: 2019/07/15 14:15:32 by fkante           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 void	ft_putchar(char c)
 {
 	write(1, &c, 1);
 }
 
-void	dec_to_hexa(int dec_nbr)
+void	ft_putnbr_hex(int octet, int rem)
 {
-	int		i;
-	int		hex_nbr;
+	const char *base = "0123456789abcdef";
 
-	i = 16;
-	if (dec_nbr < 10)
-		ft_putchar(dec_nbr + '0');
-	else if (dec_nbr < 16)
-		ft_putchar(dec_nbr + 'W');
+	if (rem > 1)
+		ft_putnbr_hex(octet >> 4, rem - 1);
+	write(1, base + (octet % 16), 1);
+}
+
+void	sp_putchar(unsigned char const *ptr)
+{
+	char const c = *ptr;
+
+	if (' ' <= c && c <= '~')
+		write(1, ptr, 1);
 	else
-	{
-		dec_to_hexa(dec_nbr / 16);
-		dec_to_hexa(dec_nbr % 16);
-	}
+		write(1, ".", 1);
 }
 
 void	print_memory(const void *addr, size_t size)
 {
-	size_t	i;
+	size_t i;
+	size_t j;
+	u_int8_t *ptr = addr;
 
 	i = 0;
-	while (i < (size*2))
+	while (i < size)
 	{
-		if ((i % 16) == 0)
-			dec_to_hexa(((int*)addr)[i]);
-		ft_putchar(' ');
-		if ((++i % 32) == 0)
-			ft_putchar('\n');
+		j = 0;
+		while (j < 16 && j + i < size)
+		{
+			ft_putnbr_hex(*(ptr + i + j), 2);
+			if (j % 2)
+				ft_putchar(' ');
+			j++;
+		}
+		while (j < 16)
+		{
+			ft_putchar(' ');
+			ft_putchar(' ');
+			if (j % 2)
+				ft_putchar(' ');
+			j++;
+		}
+		j = 0;
+		while (j < 16 && j + i < size)
+		{
+			sp_putchar(ptr + j + i);
+			j++;
+		}
+		ft_putchar('\n');
+		i += 16;
 	}
 }
 
@@ -58,3 +69,4 @@ int		main(int ac, char **av)
 
 	return (0);
 }
+
